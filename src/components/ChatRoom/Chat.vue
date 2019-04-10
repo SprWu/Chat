@@ -55,13 +55,14 @@ export default {
 .main-container {
   width: 800px;
   height: auto;
+  background-color: rgba(238, 238, 238, 0.3)
 }
 .msg-container {
   width: 800px;
   height: 550px;
   overflow-y: auto;
   overflow-x:hidden;
-  border: 1px dashed gold;
+  /* border: 1px dashed gold; */
 }
 .input {
   width: 750px;

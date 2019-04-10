@@ -51,6 +51,7 @@ export default {
           });
           //this.$store.commit('changeNickName',this.name);
           localStorage.setItem('name',this.name);
+          localStorage.setItem('isLogin',true);
           this.$router.push("/index");
         } else {
           loading.close();
