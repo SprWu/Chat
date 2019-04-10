@@ -49,6 +49,8 @@ export default {
             message: "连接服务器成功！",
             type: "success"
           });
+          //this.$store.commit('changeNickName',this.name);
+          localStorage.setItem('name',this.name);
           this.$router.push("/index");
         } else {
           loading.close();

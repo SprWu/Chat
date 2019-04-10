@@ -31,14 +31,12 @@ service.interceptors.response.use(
             return Promise.reject(error)
         }else { 
             Message({
-                message: '请求配置发生错误',
+                message: '请求配置发生错误或服务器未启动',
                 type: 'warning'
             })
             return Promise.reject(error)
         }
     }
 )
-
-
 export default service
 
