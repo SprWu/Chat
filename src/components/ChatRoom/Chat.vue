@@ -4,7 +4,10 @@
       <ul>
         <li v-for="(item,i) in chatlist" :key="i">
           <!-- <div :class="[item.type === 1? 'right' : 'left']">{{ item.msg }}</div> -->
-          <div :class="[item.type ===1 ?'right':'left']">{{ item.msg }}</div>
+          <!-- <div :class="[item.type ===1 ?'right':'left']">{{ item.msg }}</div> -->
+          <div
+            :class="{'right':item.type === 1,'leftone':item.type === 2,'lefttwo':item.type === 3}"
+          >{{ item.msg }}</div>
         </li>
       </ul>
     </div>
@@ -14,39 +17,100 @@
 </template>
 
 <script>
-import { setTimeout } from 'timers';
+import { setTimeout } from "timers";
+// import { InitWebSocket } from '@/api/websocket'
+import { wsURL } from "@/fetch";
+import { open, close } from "fs";
 export default {
   name: "chat",
   data() {
     return {
       chatlist: [],
-      message: ""
+      message: "",
+      websock: null
     };
   },
   methods: {
     scorll() {
-      let el = document.querySelector('.msg-container')
+      let el = document.querySelector(".msg-container");
       el.scrollTop = el.scrollHeight;
     },
+    /* 消息发送 */
     send() {
       if (this.message.trim().length === 0) return;
-      var n = Math.floor(Math.random()*10);
+      var n = Math.floor(Math.random() * 10);
+
       let item = {
         msg: this.message,
-        type: n%2===0?1:2
+        type: n % 3 === 0 ? 3 : n % 3
       };
       this.chatlist.push(item);
 
       //WebSocket.send...
+      this.websock.send(item);
 
       /* 
           这里如果直接调用 this.scorll()，那么由于执行的关系(v-for和scroll调用的先后)导致滚动条
         距离底部仍有距离。所以放在延时器中，确保 v-for 执行完毕后在调用scroll
       */
-      setTimeout( ()=> {
-        this.scorll()
-      },0)
+      setTimeout(() => {
+        this.scorll();
+      }, 0);
+    },
+    webSocketInit() {
+      let ws = new WebSocket(wsURL);
+      ws.onopen = () => {
+        this.$emit("cntS", "良好");
+        console.log("WebSocket连接成功！");
+      };
+      ws.onclose = () => {
+        this.$emit("cntS", "中断");
+        console.log("WebSocket连接断开！");
+      };
+      ws.onerror = e => {
+        console.log("WebSOcket连接发生错误");
+        setTimeout(() => {
+          this.webSocketInit();
+        }, 2000);
+      };
+      ws.onmessage = res => {
+        let msg = JSON.parse(res.data);
+        switch (msg.type) {
+          case 1:
+            //匹配成功
+            console.log(msg);
+            break;
+          case 2:
+            //有人发消息
+            console.log(msg);
+            break;
+          case 3:
+            //匹配需要等待
+            break;
+          case 4:
+            //普通消息推送(有人离开)
+            console.log(msg.data.msg);
+            break;
+          case 5:
+            //普通消息(取消匹配成功)
+            console.log(msg.data.msg);
+            break;
+          case 6:
+            //在线人数
+            this.$store.commit("changeNum", msg.data.users);
+            break;
+          default:
+            break;
+        }
+      };
+      return ws;
     }
+  },
+  created() {
+    this.websock =  this.webSocketInit();
+  },
+  beforeDestroy() {
+    this.websock = null;
   }
 };
 </script>
@@ -55,14 +119,14 @@ export default {
 .main-container {
   width: 800px;
   height: auto;
-  background-color: rgba(238, 238, 238, 0.3)
+  background-color: rgba(238, 238, 238, 0.3);
 }
 .msg-container {
   width: 800px;
   height: 550px;
   overflow-y: auto;
-  overflow-x:hidden;
-  /* border: 1px dashed gold; */
+  overflow-x: hidden;
+  padding-bottom: 10px;
 }
 .input {
   width: 750px;
@@ -101,9 +165,20 @@ li {
   margin: 6px 20px 0 10px;
 }
 /* 接收的信息 */
-.left {
+.leftone {
   float: left;
-  background: #F0F8FF;
+  background: #f0f8ff;
+  padding: 6px;
+  border-radius: 10px;
+  max-width: 400px;
+  border: 1px solid white;
+  box-shadow: 0 0 3px #879eee;
+  margin: 6px 10px 0 10px;
+  overflow: hidden;
+}
+.lefttwo {
+  float: left;
+  background: #63b8ff;
   padding: 6px;
   border-radius: 10px;
   max-width: 400px;

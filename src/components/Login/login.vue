@@ -67,7 +67,8 @@ export default {
 .login-main-contaner {
   top: 0; /* 避免图片上面有空隙 */
   background-image: url("../../assets/bgi.jpg");
-  background-size: cover cover; /* 将图片放大至适合屏幕的大小 */
+  background-size: 100% 100%; /* 将图片放大至适合屏幕的大小 */
+  background-repeat: no-repeat;
   width: 100%;
   height: 100%;
   position: absolute;

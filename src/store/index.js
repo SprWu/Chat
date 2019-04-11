@@ -3,18 +3,18 @@ import Vuex from 'vuex'
 Vue.use(Vuex)
 
 const state = {
-  nickName: '',
+  inLineNum: 0,
 }
 
 const mutations = {
-  changeNickName(state, newNickName) {
-    state.nickName = newNickName
+  changeNum(state, newNum) {
+    state.inLineNum = newNum
   }
 }
 
 const getters = {
-  getNickName(state) {
-    return state.nickName;
+  getInLineNum(state) {
+    return state.inLineNum;
   }
 }
 export default new Vuex.Store({
