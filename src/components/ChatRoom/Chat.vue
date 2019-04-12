@@ -6,12 +6,12 @@
           <!-- <div :class="[item.type === 1? 'right' : 'left']">{{ item.msg }}</div> -->
           <!-- <div :class="[item.type ===1 ?'right':'left']">{{ item.msg }}</div> -->
           <div
-            :class="{'right':item.type === 1,'leftone':item.type === 2,'lefttwo':item.type === 3}"
+            :class="{'right':item.name == name,'leftone':item.name == oneName,'lefttwo':item.name == twoName}"
           >{{ item.msg }}</div>
         </li>
       </ul>
     </div>
-    <el-input class="input" placeholder="请输入内容" v-model="message" clearable></el-input>
+    <el-input @keydown.enter.native="send" class="input" placeholder="请输入内容" v-model="message" clearable></el-input>
     <el-button type="primary" icon="el-icon-back" @click="send" circle></el-button>
   </div>
 </template>
@@ -21,14 +21,22 @@ import { setTimeout } from "timers";
 // import { InitWebSocket } from '@/api/websocket'
 import { wsURL } from "@/fetch";
 import { open, close } from "fs";
+import { mapGetters } from 'vuex';
 export default {
   name: "chat",
   data() {
     return {
       chatlist: [],
       message: "",
-      websock: null
+      websock: null,
     };
+  },
+  props:['name'],
+  computed: {
+    ...mapGetters({
+      oneName: 'getOneName',
+      twoName: 'getTwoName'
+    })
   },
   methods: {
     scorll() {
@@ -37,17 +45,17 @@ export default {
     },
     /* 消息发送 */
     send() {
-      if (this.message.trim().length === 0) return;
-      var n = Math.floor(Math.random() * 10);
+      if (this.message .trim().length === 0) return;
 
       let item = {
+        type: 2,
         msg: this.message,
-        type: n % 3 === 0 ? 3 : n % 3
+        name: this.name
       };
       this.chatlist.push(item);
-
+      this.message = '';
       //WebSocket.send...
-      this.websock.send(item);
+      this.websock.send(JSON.stringify(item));
 
       /* 
           这里如果直接调用 this.scorll()，那么由于执行的关系(v-for和scroll调用的先后)导致滚动条
@@ -60,8 +68,11 @@ export default {
     webSocketInit() {
       let ws = new WebSocket(wsURL);
       ws.onopen = () => {
-        this.$emit("cntS", "良好");
-        console.log("WebSocket连接成功！");
+        let data = {
+          type: 1,
+          name: this.name
+        }
+        ws.send(JSON.stringify(data));
       };
       ws.onclose = () => {
         this.$emit("cntS", "中断");
@@ -74,15 +85,23 @@ export default {
         }, 2000);
       };
       ws.onmessage = res => {
-        let msg = JSON.parse(res.data);
-        switch (msg.type) {
+        //console.log(res);
+        let data = JSON.parse(res.data);
+        // console.log(data);
+        switch (data.type) {
           case 1:
-            //匹配成功
-            console.log(msg);
+            //连接成功
+            this.$emit("cntS", "良好");
+            //console.log(data.data);
             break;
           case 2:
             //有人发消息
-            console.log(msg);
+             if(data.name != this.name) {
+               this.chatlist.push({
+                 msg: data.msg,
+                 name: data.name
+               })
+             }
             break;
           case 3:
             //匹配需要等待
@@ -97,7 +116,9 @@ export default {
             break;
           case 6:
             //在线人数
-            this.$store.commit("changeNum", msg.data.users);
+            this.$store.commit("changeNum", data.data);
+            let users = data.user.filter( user => user != this.name)
+            this.$store.commit("setName",users)
             break;
           default:
             break;

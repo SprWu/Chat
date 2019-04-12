@@ -23,7 +23,7 @@
         </el-row>
       </div>
     </div>
-    <chat-box @cntS="cntS" class="chatBox"></chat-box>
+    <chat-box :name="selfName" @cntS="cntS" class="chatBox"></chat-box>
     <!-- 对话框 -->
     <el-dialog title="确定退出?" :visible.sync="dialogState" width="30%">
       <el-button @click="dialogState = false">取 消</el-button>
@@ -42,8 +42,6 @@ export default {
   data() {
     return {
       selfName: "",
-      oneName: "",
-      twoName: "",
       dialogState: false,
       state: "断开"
     };
@@ -54,6 +52,10 @@ export default {
         if(res.data.type === 6) {
           this.oneName = res.data.userInfo.one;
           this.twoName = res.data.userInfo.two;
+          this.$store.commit('setName',{
+            oneName: this.oneName,
+            twoName: this.twoName
+          })
         }else {
           this.$message.error("信息获取失败!")
         }
@@ -79,12 +81,14 @@ export default {
   },
   computed: {
     ...mapGetters({
-      num: 'getInLineNum'
+      num: 'getInLineNum',
+      oneName: 'getOneName',
+      twoName: 'getTwoName'
     })
   },
   created() {
     this.selfName = localStorage.getItem("name");
-    this.initInfo()
+    // this.initInfo()
   },
   components: {
     chatBox
