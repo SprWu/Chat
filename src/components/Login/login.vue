@@ -43,12 +43,8 @@ export default {
         password: this.password
       };
       getConnect(data).then(res => {
-        if (res.data.type === 1) {
+        if (res.data === 1) {
           loading.close();
-          this.$message({
-            message: "连接服务器成功！",
-            type: "success"
-          });
           //this.$store.commit('changeNickName',this.name);
           localStorage.setItem('name',this.name);
           localStorage.setItem('isLogin',true);

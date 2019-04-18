@@ -3,59 +3,100 @@
     <div class="msg-container">
       <ul>
         <li v-for="(item,i) in chatlist" :key="i">
-          <!-- <div :class="[item.type === 1? 'right' : 'left']">{{ item.msg }}</div> -->
-          <!-- <div :class="[item.type ===1 ?'right':'left']">{{ item.msg }}</div> -->
-          <div
-            :class="{'right':item.name == name,'leftone':item.name == oneName,'lefttwo':item.name == twoName}"
-          >{{ item.msg }}</div>
+          <!-- <div :class="[item.name === name?'right':'left']">
+            <span>{{ name }}</span>
+            <span class="msg">{{ item.msg }}</span>
+          </div> -->
+          <div class='right' v-if="item.name === name">
+            <span>{{ item.msg }}</span>
+          </div>
+          <div class="left" v-else>
+            <span>{{ item.name }}:     </span>
+            <span>{{ item.msg }}</span>
+          </div>
         </li>
       </ul>
     </div>
-    <el-input @keydown.enter.native="send" class="input" placeholder="请输入内容" v-model="message" clearable></el-input>
+    <el-input
+      @keydown.enter.native="send"
+      class="input"
+      placeholder="请输入内容"
+      v-model="message"
+      clearable
+    ></el-input>
     <el-button type="primary" icon="el-icon-back" @click="send" circle></el-button>
   </div>
 </template>
 
 <script>
 import { setTimeout } from "timers";
-// import { InitWebSocket } from '@/api/websocket'
 import { wsURL } from "@/fetch";
 import { open, close } from "fs";
-import { mapGetters } from 'vuex';
+import { mapGetters } from "vuex";
 export default {
   name: "chat",
   data() {
     return {
       chatlist: [],
-      message: "",
-      websock: null,
+      message: ""
     };
   },
-  props:['name'],
-  computed: {
-    ...mapGetters({
-      oneName: 'getOneName',
-      twoName: 'getTwoName'
-    })
+  props: ["name"],
+  sockets: {
+    connect() { // 连接服务器成功
+      this.$emit("cntS", "良好");
+      this.$socket.emit("join", { name: this.name });
+    },
+    connect_failed() { // 连接服务器失败
+      this.$emit("cntS", "断开");
+      this.$message.error("连接聊天服务器失败");
+    },
+    disconnect() { /// 与服务器连接断开
+      this.$message.error("与聊天服务器断开连接");
+      this.$emit("cntS", "断开");
+    },
+    getList(data) { // 获取列表信息
+      this.$emit("cntS", "良好");
+      this.$store.commit("changeList", data.list);
+    },
+    fail(data) { // 错误反馈
+      console.log(data.error);
+    },
+    inform(data) { // 加入/退出群聊提醒
+      this.$message({
+        showClose: true,
+        message: data.msg,
+        type: "warning"
+      });
+    },
+    listen(data) { // 有新消息
+      this.chatlist.push(data);
+    }
+  },
+  mounted() {
+    this.$socket.emit("join", { name: this.name });
   },
   methods: {
+    /* 退出 */
+    back() {
+      this.$socket.emit("quit", { name: this.name });
+    },
     scorll() {
       let el = document.querySelector(".msg-container");
       el.scrollTop = el.scrollHeight;
     },
     /* 消息发送 */
     send() {
-      if (this.message .trim().length === 0) return;
+      if (this.message.trim().length === 0) return;
 
       let item = {
-        type: 2,
         msg: this.message,
         name: this.name
       };
       this.chatlist.push(item);
-      this.message = '';
-      //WebSocket.send...
-      this.websock.send(JSON.stringify(item));
+      this.message = "";
+      
+      this.$socket.emit('send', item)
 
       /* 
           这里如果直接调用 this.scorll()，那么由于执行的关系(v-for和scroll调用的先后)导致滚动条
@@ -64,74 +105,7 @@ export default {
       setTimeout(() => {
         this.scorll();
       }, 0);
-    },
-    webSocketInit() {
-      let ws = new WebSocket(wsURL);
-      ws.onopen = () => {
-        let data = {
-          type: 1,
-          name: this.name
-        }
-        ws.send(JSON.stringify(data));
-      };
-      ws.onclose = () => {
-        this.$emit("cntS", "中断");
-        console.log("WebSocket连接断开！");
-      };
-      ws.onerror = e => {
-        console.log("WebSOcket连接发生错误");
-        setTimeout(() => {
-          this.webSocketInit();
-        }, 2000);
-      };
-      ws.onmessage = res => {
-        //console.log(res);
-        let data = JSON.parse(res.data);
-        // console.log(data);
-        switch (data.type) {
-          case 1:
-            //连接成功
-            this.$emit("cntS", "良好");
-            //console.log(data.data);
-            break;
-          case 2:
-            //有人发消息
-             if(data.name != this.name) {
-               this.chatlist.push({
-                 msg: data.msg,
-                 name: data.name
-               })
-             }
-            break;
-          case 3:
-            //匹配需要等待
-            break;
-          case 4:
-            //普通消息推送(有人离开)
-            console.log(msg.data.msg);
-            break;
-          case 5:
-            //普通消息(取消匹配成功)
-            console.log(msg.data.msg);
-            break;
-          case 6:
-            //在线人数
-            this.$store.commit("changeNum", data.data);
-            let users = data.user.filter( user => user != this.name)
-            this.$store.commit("setName",users)
-            break;
-          default:
-            break;
-        }
-      };
-      return ws;
     }
-  },
-  created() {
-    this.websock =  this.webSocketInit();
-  },
-  beforeDestroy() {
-    this.websock = null;
   }
 };
 </script>
@@ -186,20 +160,9 @@ li {
   margin: 6px 20px 0 10px;
 }
 /* 接收的信息 */
-.leftone {
+.left {
   float: left;
   background: #f0f8ff;
-  padding: 6px;
-  border-radius: 10px;
-  max-width: 400px;
-  border: 1px solid white;
-  box-shadow: 0 0 3px #879eee;
-  margin: 6px 10px 0 10px;
-  overflow: hidden;
-}
-.lefttwo {
-  float: left;
-  background: #63b8ff;
   padding: 6px;
   border-radius: 10px;
   max-width: 400px;

@@ -4,33 +4,26 @@ Vue.use(Vuex)
 
 const state = {
   inLineNum: 0,
-  oneName: '',
-  twoName: ''
+  userList: []
 }
 
 const mutations = {
-  changeNum(state, newNum) {
-    state.inLineNum = newNum
+  userAdd(state,user) {
+    if(state.userList.indexOf(user) === -1)
+      state.userList.push(user);
   },
-  setName(state,params) {
-    // state.selfName = selfName;
-    state.oneName = params[0] || '';
-    state.twoName = params[1] || '';
+  changeList(state, list) {
+    state.userList = list;
+  },
+  userRemove(state,user) {
+    let arr = state.userList.filter( u => u != user)
+    state.userList = arr;
   }
 }
 
 const getters = {
-  getInLineNum(state) {
-    return state.inLineNum;
-  },
-  // getSelfName(state) {
-  //   return state.selfName;
-  // },
-  getOneName(state) {
-    return state.oneName;
-  },
-  getTwoName(state) {
-    return state.twoName;
+  getUserList(state) {
+    return state.userList;
   }
 }
 export default new Vuex.Store({

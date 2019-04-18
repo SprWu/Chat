@@ -2,9 +2,9 @@ import axios from 'axios'
 import qs from 'qs'
 import {Message} from 'element-ui'
 
-const baseURL = 'http://192.168.1.103';
+const baseURL = 'http://192.168.1.137:9000';
 
-export const wsURL = "ws://192.168.1.103:9000";
+export const wsURL = "ws://192.168.1.137:9000";
 
 const service = axios.create({
     baseURL,
