@@ -142,13 +142,16 @@ export default {
   },
   created() {
     this.name = localStorage.getItem("name");
+    // window.onbeforeunload = () => {
+    //   this.$socket.emit('quit', {name: this.name})
+    // }
   },
   mounted() {
     this.$socket.emit("join", { name: this.name });
     let bar = document.querySelector(".bar").clientHeight;
     let input = document.querySelector(".input").clientHeight;
     this.$refs.msgBox.style.maxHeight = this.screenHeight - bar - input + "px";
-  }
+  },
 };
 </script>
 

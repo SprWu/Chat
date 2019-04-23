@@ -75,9 +75,9 @@ export default {
   },
   mounted() {
     this.$socket.emit("join", { name: this.name });
-    window.onbeforeunload = () => {
-      this.$socket.emit("quit", { name: this.name });
-    }
+    // window.onbeforeunload = () => {
+    //   this.$socket.emit("quit", { name: this.name });
+    // }
   },
   methods: {
     /* 退出 */
