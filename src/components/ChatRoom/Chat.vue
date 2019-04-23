@@ -34,7 +34,7 @@ import { wsURL } from "@/fetch";
 import { open, close } from "fs";
 import { mapGetters } from "vuex";
 export default {
-  name: "chat",
+  name: "pcchat",
   data() {
     return {
       chatlist: [],
@@ -75,6 +75,9 @@ export default {
   },
   mounted() {
     this.$socket.emit("join", { name: this.name });
+    window.onbeforeunload = () => {
+      this.$socket.emit("quit", { name: this.name });
+    }
   },
   methods: {
     /* 退出 */
@@ -138,7 +141,6 @@ li {
   list-style-type: none;
   margin-top: 10px;
   clear: both; /* 左右不允许出现浮动元素 */
-  margin-top: 10px;
   display: block;
 }
 /* 自己发出的信息 */

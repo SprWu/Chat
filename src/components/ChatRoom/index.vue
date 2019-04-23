@@ -7,13 +7,21 @@
       </ul>
     </div>
     <div class="info-container">
-      <div class="logout">
-        <span class="connect-state">连接状态：<span :class="[state === '良好'?'good':'bad']">{{ state }}</span></span>
-        <span>您的昵称:<span class="self">{{ selfName }}</span></span>
-        <el-button class="back" @click="dialogState = true;" type="warning" icon="el-icon-close" circle></el-button>
-      </div>
-      <div class="user-info">
-      </div>
+      <span class="connect-state">
+        连接状态：
+        <span :class="[state === '良好'?'good':'bad']">{{ state }}</span>
+      </span>
+      <span>
+        您的昵称:
+        <span class="self">{{ selfName }}</span>
+      </span>
+      <el-button
+        class="back"
+        @click="dialogState = true;"
+        type="warning"
+        icon="el-icon-close"
+        circle
+      ></el-button>
     </div>
     <chat-box ref="chatbox" :name="selfName" @cntS="cntS" class="chatBox"></chat-box>
     <!-- 对话框 -->
@@ -26,9 +34,9 @@
 
 <script>
 import chatBox from "@/components/ChatRoom/Chat";
-import { setTimeout } from 'timers';
-import {getInfo} from '@/api/info.js'
-import {mapGetters} from 'vuex'
+import { setTimeout } from "timers";
+import { getInfo } from "@/api/info.js";
+import { mapGetters } from "vuex";
 export default {
   name: "index",
   data() {
@@ -39,33 +47,18 @@ export default {
     };
   },
   methods: {
-    initInfo() {
-      getInfo().then( res => {
-        if(res.data.type === 6) {
-          this.oneName = res.data.userInfo.one;
-          this.twoName = res.data.userInfo.two;
-          this.$store.commit('setName',{
-            oneName: this.oneName,
-            twoName: this.twoName
-          })
-        }else {
-          this.$message.error("信息获取失败!")
-        }
-      })
-    },
     goBack() {
       this.dialogState = false;
       localStorage.clear();
       this.$refs.chatbox.back();
       this.$message({
         message: "感谢您的使用,欢迎再次寻觅知音",
-        type: 'success',
+        type: "success",
         duration: 2000
-      })
+      });
       setTimeout(() => {
-        this.$router.push('/login')
-      },2000)
-      
+        this.$router.push("/login");
+      }, 2000);
     },
     /* WebSocket连接状态改变时触发 */
     cntS(state) {
@@ -74,12 +67,12 @@ export default {
   },
   computed: {
     ...mapGetters({
-      userList: 'getUserList'
+      userList: "getUserList"
     })
   },
   created() {
     this.selfName = localStorage.getItem("name");
-    this.$store.commit('userAdd',this.selfName);
+    this.$store.commit("userAdd", this.selfName);
     // this.initInfo()
   },
   components: {
@@ -122,20 +115,21 @@ export default {
   line-height: 30px;
   font-weight: bold;
   color: rgb(13, 23, 64);
-  background-color: rgba(255,192,159,0.5);
+  background-color: rgba(255, 192, 159, 0.5);
   border-radius: 6px;
   border: 1px solid white;
-   box-shadow: 0 0 3px #879eee;
+  box-shadow: 0 0 3px #879eee;
 }
 .info-container {
   margin: 30px auto 0 auto;
   width: 800px;
   height: 60px;
+  line-height: 60px;
   border-radius: 6px;
   border: 1px solid rgba(238, 238, 238, 0.3);
   background-color: rgba(135, 206, 250, 0.75);
 }
-.userinfo {
+/* .userinfo {
   padding-left: 10px;
   width: 100%;
   height: 30px;
@@ -143,14 +137,14 @@ export default {
   position: relative;
   bottom: 0px;
   text-align: left;
-}
+} */
 .line-num {
   color: goldenrod;
   font-weight: bold;
   font-size: 20px;
   margin-left: 10px;
 }
-.connect-state{
+.connect-state {
   float: left;
   margin-left: 10px;
 }
@@ -166,10 +160,6 @@ export default {
 .chatBox {
   margin: 0 auto;
 }
-.logout {
-  width: 100%;
-  height: 30px;
-}
 .user-info {
   width: 100%;
 }
@@ -184,7 +174,7 @@ export default {
   font-weight: bold;
 }
 .chat-two {
-  color: #5CACEE;
+  color: #5cacee;
   font-size: 20px;
   font-weight: bold;
 }

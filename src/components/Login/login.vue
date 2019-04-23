@@ -10,7 +10,9 @@
 
 <script>
 import { getConnect } from "@/api/login";
-import { setTimeout } from 'timers';
+import { setTimeout } from "timers";
+import { isMobile } from "@/api/judge";
+
 export default {
   name: "Login",
   data() {
@@ -35,9 +37,9 @@ export default {
         spinner: "el-icon-loading",
         backgournd: "rgba(0, 0, 0, 0.3)"
       });
-      setTimeout( () => {
-          loading.close()
-      },5000);
+      setTimeout(() => {
+        loading.close();
+      }, 5000);
       let data = {
         name: this.name,
         password: this.password
@@ -46,12 +48,16 @@ export default {
         if (res.data === 1) {
           loading.close();
           //this.$store.commit('changeNickName',this.name);
-          localStorage.setItem('name',this.name);
-          localStorage.setItem('isLogin',true);
-          this.$router.push("/index");
+          localStorage.setItem("name", this.name);
+          localStorage.setItem("isLogin", true);
+          if (isMobile()) {
+            this.$router.push("/mo_index");
+          } else {
+            this.$router.push("/pc_index");
+          }
         } else {
           loading.close();
-          this.$message.error("连接服务器失败！");
+          this.$message.error("登录失败");
         }
       });
     }
