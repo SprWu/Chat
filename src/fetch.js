@@ -2,7 +2,7 @@ import axios from 'axios'
 import qs from 'qs'
 import {Message} from 'element-ui'
 
-export const HOST = '192.168.249.187';
+export const HOST = '129.211.17.57';
 const PORT = '9000';
 
 const baseURL = 'http://' + HOST +':' + PORT;

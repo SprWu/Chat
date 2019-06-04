@@ -27,7 +27,7 @@ const router = new Router({
     component: MoIndex
   }, { // 错误路由跳转到首页
     path: '*',
-    redirect: '/index'
+    redirect: '/'
   }]
 })
 

@@ -12,6 +12,11 @@ import store from '@/store/index'
 import VueSocket from 'vue-socket.io'
 import { HOST } from '@/fetch'
 
+// 在生产环境下或发布时，禁用devtools工具
+// Vue.config.devtools = false
+// Vue.config.debug = false
+// Vue.config.silent = true
+
 Vue.config.productionTip = false
 Vue.use(ElementUI)
 Vue.use(MuseUI)
